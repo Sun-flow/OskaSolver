@@ -23,13 +23,13 @@ class OskaBoard:
         self.col = col
 
     def __init__(self, inList, playerTurn):
+   
         self.totalRows = len(inList)
         self.maxRowLength = len(inList[0])
         pastCenter = 1
         self.playerTurn = playerTurn
         self.board = []
 
-        #TODO: Check to make sure there are not too many pieces on the board (> self.maxRowLength). Could keep a counter for W and B, increment when it is found. Or do a check after board import.
         try: 
             if self.totalRows == 2 * self.maxRowLength - 3:
 
