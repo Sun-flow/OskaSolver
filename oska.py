@@ -4,7 +4,8 @@ class Error(Exception):
 class InvalidRowLength(Error):
     pass
 
-class InvalidInput(Error)
+class InvalidInput(Error):
+    pass
 
 
 
