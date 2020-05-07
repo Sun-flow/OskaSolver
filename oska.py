@@ -15,6 +15,8 @@ class Oska:
         totalRows = len(inList)
         maxRowLength = len(inList[0])
 
+        print
+
         self.board = []
 
         #TODO: Check to make sure there are not too many pieces on the board (> maxRowLength). Could keep a counter for W and B, increment when it is found. Or do a check after board import.
@@ -23,24 +25,24 @@ class Oska:
 
                 rowNum = 0
                 for row in inList:
+                    print('Row #', rowNum, ': ', row)
                     if rowNum <= (totalRows - 1) / 2:
                         if len(inList[rowNum]) == maxRowLength - rowNum:
-                            self.board[rowNum] = inList[rowNum]
+                            self.board += row
                         else:
-                            raise InvalidRowLength(rowNum, inList[rowNum])
-                    elif rowNum == (((totalRows - 1) / 2) + 1):
+                            raise InvalidRowLength(1, rowNum, inList[rowNum])
+                    elif rowNum == (((totalRows - 1) / 2)):
                         if len(inList[rowNum]) == 2:
-                            self.board[rowNum] = inList[rowNum]
+                            self.board += row
                         else:
-                            raise InvalidRowLength(rowNum, inList[rowNum])
+                            raise InvalidRowLength(2, rowNum, inList[rowNum])
                     elif rowNum >= (totalRows + 1) / 2:
-                        if len(inList[rowNum]) == 2 + (rowNum - (totalRows / 2)):
-                            self.board[rowNum] = inList[rowNum]
+                        if len(inList[rowNum]) == totalRows - (totalRows - rowNum):
+                            self.board += row
                         else:
-                            raise InvalidRowLength(rowNum, inList[rowNum])
+                            raise InvalidRowLength(3, rowNum, inList[rowNum])
 
-                    self.board[rowNum] = row
-                    row += 1
+                    rowNum += 1
 
             else:
                 raise InvalidInput(inList)
@@ -49,5 +51,16 @@ class Oska:
             print('Invalid row length: ', inst.args)
         except InvalidInput as inst:
             print('Invalid input: ', inst.args)
+
+
+    def printBoard(self):
+        for row in self.board:
+            print(row)
         
-        
+
+
+def testinput():
+
+    newBoard = Oska(['wwww','---','--','---','bbbb'])
+
+    newBoard.printBoard()
