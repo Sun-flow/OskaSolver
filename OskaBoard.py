@@ -127,53 +127,88 @@ class OskaBoard:
 
     def movedown(self, mode, piece, index):
         newBoards = []
-        row = piece[0]
-        col = piece[1]
+        currRow = piece[0]
+        currRowLen = len(self.board[currRow])
+        currCol = piece[1]
+        nextRow = currRow + 1
+        jumpRow = nextRow + 1
+        nextRowLen = None
+        leftCol = None
+        rightCol = None
+        leftJump = None
+        rightJump = None
+
+
         if mode == 0:
-            if col > 0 and row < (self.totalRows - 1) / 2 and self.board[row + 1][col - 1] == '-':
-
-                board = deepcopy(self)
-                
-                board.wPieces[index] = (row + 1, col - 1)
-                
-                board.replacechar(row, col, '-')
-                board.replacechar(row + 1, col - 1, 'w')
-                
-                newBoards += [board]
-
-            if col < len(self.board[row]) - 1 and row < self.totalRows and self.board[row + 1][col]:
-                board = deepcopy(self)
-
-                board.wPieces[index] = (row + 1, col)
-
-                board.replacechar(row, col, '-')
-                board.replacechar(row + 1, col, 'w')
-
-                newBoards += [board]
+            nextRowLen = -1
+            leftCol = currCol - 1
+            rightCol = currCol
+            leftJump = -1
+            rightJump = 0
         elif mode == 1:
-            if col >= 0 and row >= (self.totalRows - 1) / 2 and self.board[row + 1][col] == '-':
+            nextRowLen = 1
+            leftCol = currCol
+            rightCol = currCol + 1
+            leftJump = 0
+            rightJump = 1
+
+        if leftCol >= 0:
+            if self.board[nextRow][leftCol] == '-':
 
                 board = deepcopy(self)
                 
-                board.wPieces[index] = (row + 1, col)
+                board.wPieces[index] = (nextRow, leftCol)
                 
-                board.replacechar(row, col, '-')
-                board.replacechar(row + 1, col, 'w')
+                board.replacechar(currRow, currCol, '-')
+                board.replacechar(nextRow, leftCol, 'w')
                 
                 newBoards += [board]
+            elif self.board[nextRow][leftCol] == 'b':
+                jumpCol = leftCol + leftJump
+                
+                if jumpRow < self.totalRows and self.board[jumpRow][jumpCol] == '-':
+                    board = deepcopy(self)
+                
+                    board.wPieces[index] = (jumpRow, jumpCol)
+                    
+                    board.replacechar(nextRow, leftCol, '-')
+                    board.replacechar(currRow, currCol, '-')
+                    board.replacechar(jumpRow, jumpCol, 'w')
+            
 
-            if col < len(self.board[row + 1]) and row >= (self.totalRows - 1) / 2 and self.board[row + 1][col + 1] == '-':
+        if rightCol < currRowLen + nextRowLen and currRow < self.totalRows:
+            if self.board[nextRow][rightCol] == '-':
                 board = deepcopy(self)
 
-                board.wPieces[index] = (row + 1, col + 1)
+                board.wPieces[index] = (nextRow, currCol)
 
-                board.replacechar(row, col, '-')
-                board.replacechar(row + 1, col + 1, 'w')
+                board.replacechar(currRow, currCol, '-')
+                board.replacechar(nextRow, rightCol, 'w')
 
                 newBoards += [board]
+            
+            elif self.board[nextRow][rightCol] == 'b':
+                jumpCol = rightCol + rightJump
+                
+                if jumpRow < self.totalRows and self.board[jumpRow][jumpCol] == '-':
+                    board = deepcopy(self)
+                
+                    board.wPieces[index] = (jumpRow, jumpCol)
+                    
+                    board.replacechar(nextRow, rightCol, '-')
+
+                    board.replacechar(currRow, currCol, '-')
+                    board.replacechar(jumpRow, jumpCol, 'w')
+
+                    newBoards += [board]
+
 
         return newBoards
 
+    
+    def jumpdown(self, wpiece, windex, bpiece, bindex, diff):
+
+        dothing = []
 
 
 

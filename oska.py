@@ -21,10 +21,10 @@ def generatechildren(inBoard, playerTurn):
 
 def testinput():
 
-    newBoard = OskaBoard.OskaBoard(['wwww','---','--','---','bbbb'], 'W')
+    #newBoard = OskaBoard.OskaBoard(['www-','---','-w','---','bbbb'], 'W')
     #newBoard.printBoard()
 
-    newBoard2 = OskaBoard.OskaBoard(['ww-w-','----','---','-w','--w','----','bbbbb'], 'W')
+    #newBoard2 = OskaBoard.OskaBoard(['ww-w-','----','---','-w','--w','----','bbbbb'], 'W')
     #newBoard2.printBoard()
 
     #newBoard3 = OskaBoard.OskaBoard(['wwwww','----','---','---','----','bbbbb'], 'W')
@@ -38,10 +38,17 @@ def testinput():
     #newBoard6 = OskaBoard.OskaBoard(['wwwq','---','--','---','bbbb'], 'W')
     #newBoard6.printBoard()
 
-    newChildren = generatechildren(newBoard, 'w')
-    for child in newChildren:
-        child.printBoard()
+    #newChildren = generatechildren(newBoard, 'w')
+    #for child in newChildren:
+    #    child.printBoard()
 
-    newChildren2 = generatechildren(newBoard2, 'w')
-    for child in newChildren2:
+    #newChildren2 = generatechildren(newBoard2, 'w')
+    #for child in newChildren2:
+    #    child.printBoard()
+
+    newBoard7 = OskaBoard.OskaBoard(['-----','----','-w-','bb','---','----','-----'], 'W')
+    newBoard7.printBoard()
+
+    newChildren7 = generatechildren(newBoard7, 'w')
+    for child in newChildren7:
         child.printBoard()
