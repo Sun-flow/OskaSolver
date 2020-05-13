@@ -106,99 +106,140 @@ class OskaBoard:
         self.board[row] = newStr
 
 
-    def movewhite(self):
+    def generatechildren(self, turn):
         newBoards = []
         
-        for piece in self.wPieces:
-            index = self.wPieces.index(piece)
-            row = piece[0]
-            print(
-                'Piece:', piece,
-                '\nindex:', index
-            )
-            if row < (self.totalRows - 1) / 2:
-                newBoards += self.movedown(0, piece, index)
-            else:
-                newBoards += self.movedown(1, piece, index)
+        if turn == 'w':
+            for piece in self.wPieces:
+                index = self.wPieces.index(piece)
+                newBoards += self.move(piece, index, turn)
+
+        else:
+            for piece in self.bPieces:
+                index = self.bPieces.index(piece)
+                newBoards += self.move(piece, index, turn)
+
+            
         if newBoards != []:
             return newBoards
         else:
             return None
 
-    def movedown(self, mode, piece, index):
+    def move(self, piece, index, turn):
         newBoards = []
         currRow = piece[0]
-        currRowLen = len(self.board[currRow])
         currCol = piece[1]
-        nextRow = currRow + 1
-        jumpRow = nextRow + 1
-        nextRowLen = None
+        
         leftCol = None
         rightCol = None
-        leftJump = None
-        rightJump = None
+        leftJump = 0
+        rightJump = 1
 
+        playerPieces = turn
+        oppPieces = None
+        if turn == 'w':
+            oppPieces = 'b'
+        else:
+            oppPieces = 'w'
+        
 
-        if mode == 0:
-            nextRowLen = -1
-            leftCol = currCol - 1
-            rightCol = currCol
-            leftJump = -1
-            rightJump = 0
-        elif mode == 1:
-            nextRowLen = 1
-            leftCol = currCol
-            rightCol = currCol + 1
-            leftJump = 0
-            rightJump = 1
+        nextRow = None
+        jumpRow = None
+        if turn == 'w':
+            nextRow = currRow + 1
+            jumpRow = nextRow + 1
+            if currRow <= (self.totalRows - 1) / 2:
+                leftCol = currCol - 1
+                rightCol = currCol
+                if jumpRow < (self.totalRows + 1) / 2:
+                    leftJump = -1
+                    rightJump = 0
+            else:
+                leftCol = currCol
+                rightCol = currCol + 1
+
+        else:
+            nextRow = currRow - 1
+            jumpRow = nextRow - 1
+
+            if currRow >= (self.totalRows + 1) / 2:
+                leftCol = currCol - 1
+                rightCol = currCol
+                if jumpRow > (self.totalRows - 1) / 2:
+                    leftJump = -1
+                    rightJump = 0
+            else:
+                leftCol = currCol
+                rightCol = currCol + 1
+
+        
+            
 
         if leftCol >= 0:
             if self.board[nextRow][leftCol] == '-':
 
                 board = deepcopy(self)
                 
-                board.wPieces[index] = (nextRow, leftCol)
+                if turn == 'w':
+                    board.wPieces[index] = (nextRow, leftCol)
+                else:
+                    board.bPieces[index] = (nextRow, leftCol)
                 
                 board.replacechar(currRow, currCol, '-')
-                board.replacechar(nextRow, leftCol, 'w')
+                board.replacechar(nextRow, leftCol, turn)
                 
                 newBoards += [board]
-            elif self.board[nextRow][leftCol] == 'b':
+
+            elif self.board[nextRow][leftCol] == oppPieces:
                 jumpCol = leftCol + leftJump
                 
                 if jumpRow < self.totalRows and self.board[jumpRow][jumpCol] == '-':
                     board = deepcopy(self)
-                
-                    board.wPieces[index] = (jumpRow, jumpCol)
+
+                    if turn == 'w':
+                        board.bPieces.remove((nextRow, leftCol))
+                        board.wPieces[index] = (jumpRow, jumpCol)
+                    else:
+                        board.wPieces.remove((nextRow, leftCol))
+                        board.bPieces[index] = (jumpRow, jumpCol)
                     
                     board.replacechar(nextRow, leftCol, '-')
                     board.replacechar(currRow, currCol, '-')
-                    board.replacechar(jumpRow, jumpCol, 'w')
+                    board.replacechar(jumpRow, jumpCol, turn)
+
+                    newBoards += [board]
             
 
-        if rightCol < currRowLen + nextRowLen and currRow < self.totalRows:
-            if self.board[nextRow][rightCol] == '-':
+        if rightCol < len(self.board[nextRow]) and currRow < self.totalRows and currRow >= 0 and nextRow >= 0 and nextRow < self.totalRows:
+            if nextRow < self.totalRows and self.board[nextRow][rightCol] == '-':
                 board = deepcopy(self)
 
-                board.wPieces[index] = (nextRow, currCol)
+                if turn == 'w':
+                    board.wPieces[index] = (nextRow, rightCol)
+                else:
+                    board.bPieces[index] = (nextRow, rightCol)
+
 
                 board.replacechar(currRow, currCol, '-')
-                board.replacechar(nextRow, rightCol, 'w')
+                board.replacechar(nextRow, rightCol, turn)
 
                 newBoards += [board]
             
-            elif self.board[nextRow][rightCol] == 'b':
+            elif self.board[nextRow][rightCol] == oppPieces:
                 jumpCol = rightCol + rightJump
                 
-                if jumpRow < self.totalRows and self.board[jumpRow][jumpCol] == '-':
-                    board = deepcopy(self)
-                
-                    board.wPieces[index] = (jumpRow, jumpCol)
-                    
+                if jumpRow < self.totalRows and jumpRow >= 0 and self.board[jumpRow][jumpCol] == '-':
+                    board = deepcopy(self)               
+
                     board.replacechar(nextRow, rightCol, '-')
 
+                    if turn == 'w':
+                        board.bPieces.remove((nextRow, rightCol))
+                    else:
+                        board.wPieces.remove((nextRow, rightCol))
+
                     board.replacechar(currRow, currCol, '-')
-                    board.replacechar(jumpRow, jumpCol, 'w')
+                    board.replacechar(jumpRow, jumpCol, turn)
 
                     newBoards += [board]
 
@@ -207,10 +248,8 @@ class OskaBoard:
 
     
     def jumpdown(self, wpiece, windex, bpiece, bindex, diff):
-
         dothing = []
+        
 
 
 
-    def moveblack(inBoard):
-        newboards = []

@@ -4,19 +4,7 @@ import OskaBoard
 
 
 def generatechildren(inBoard, playerTurn):
-    newBoards = []
-    if playerTurn == 'w' or playerTurn == 'W':
-        newBoards = inBoard.movewhite()
-    elif playerTurn == 'b' or playerTurn == 'B':
-        newBoards = inBoard.moveblack()
-    else:
-        print('Invalid player: ', playerTurn)
-
-    if newBoards != None:
-        return newBoards
-    else:
-        return None
-
+    return inBoard.generatechildren(playerTurn)
 
 
 def testinput():
@@ -46,9 +34,9 @@ def testinput():
     #for child in newChildren2:
     #    child.printBoard()
 
-    newBoard7 = OskaBoard.OskaBoard(['-----','----','-w-','bb','---','----','-----'], 'W')
+    newBoard7 = OskaBoard.OskaBoard(['--w--','-b--','---','--','---','-ww-','-bb--'], 'b')
     newBoard7.printBoard()
 
-    newChildren7 = generatechildren(newBoard7, 'w')
+    newChildren7 = generatechildren(newBoard7, 'b')
     for child in newChildren7:
         child.printBoard()
