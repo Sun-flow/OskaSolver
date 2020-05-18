@@ -1,12 +1,18 @@
 import OskaBoard
 
+# Required move-generation function.
+# 
+# Inputs: Oska board of any length as list, moving player's turn
+# 
+# Return: List of boards that can be reached from current board in a single move  
+def movegen(inBoard, playerTurn):
+    Board = OskaBoard.OskaBoard(inBoard, playerTurn)
+    return Board.generatechildren()
 
 
 
-def generatechildren(inBoard, playerTurn):
-    return inBoard.generatechildren(playerTurn)
-
-
+# Function for testing other functions. Makes it easy for me to test things without having to type them in over and over. 
+# Leaving it here so that I don't have a file with just one function hanging around awkwardly.
 def testinput():
 
     #newBoard = OskaBoard.OskaBoard(['www-','---','-w','---','bbbb'], 'W')
@@ -34,9 +40,11 @@ def testinput():
     #for child in newChildren2:
     #    child.printBoard()
 
-    newBoard7 = OskaBoard.OskaBoard(['--w--','-b--','---','--','---','-ww-','-bb--'], 'b')
-    newBoard7.printBoard()
+    #newChildren7b = movegen(newBoard7, 'b')
+    #for child in newChildren7b:
+    #    child.printBoard()
 
-    newChildren7 = generatechildren(newBoard7, 'b')
-    for child in newChildren7:
+    newChildren7w = movegen(['--ww--','--b--','-w--','-b-','-w','---','----','-----','------'], 'b')
+    for child in newChildren7w:
         child.printBoard()
+    
