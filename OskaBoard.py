@@ -423,7 +423,7 @@ class OskaBoard:
         wNum = len(self.wPieces)
         bNum = len(self.bPieces)
 
-        val = (wNum - bNum)
+        val = (wNum - bNum) * 2
         #print(val)
         wDist = 0
         for wpiece in self.wPieces:
@@ -475,10 +475,10 @@ class OskaBoard:
         #eval += self.maxRowLength * bGoalCount * -1
 
         #if wInGoal == True:
-        #    eval += (len(self.wPieces) - wGoalCount) * (-1)
+        val += (len(self.wPieces) - wGoalCount) * (-1)
         
         #if bInGoal == True:
-        #    eval += (len(self.bPieces) - bGoalCount)    
+        val += (len(self.bPieces) - bGoalCount)    
 
         return val
 
@@ -486,10 +486,6 @@ class OskaBoard:
     def canMove(self, nextRow, nextCols):
         openMoves = 0
         for col in nextCols:
-            #print('nextRow:',nextRow)
-            #print('nextCol:',col)
-
-
             if nextRow < self.totalRows and nextRow >= 0 and col >= 0 and col < len(self.board[nextRow]) and self.board[nextRow][col] == '-':
                 openMoves += 1
 
@@ -498,7 +494,6 @@ class OskaBoard:
 
     def canJump(self, oppTurn, nextRow, jumpRow, currCol, nextCols):
         availableJumps = 0
-        #print(nextCols)
         for col in nextCols:
             nextCol = col[0]
             jumpCol = nextCol + col[1]
