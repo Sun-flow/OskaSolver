@@ -153,7 +153,12 @@ class OskaBoard:
         self.board[row] = newStr
 
 
-
+    # Prep a selected piece to move in a chosen direction. Used for manual play either against another human or against AI. 
+    # Not error handled, assumes valid inputs. Preps similar to prep_move_data, then sends data to makemove to actually process move.
+    # 
+    # Inputs: piece row, piece column, desired direction (l/r)
+    # 
+    # Return: makemove function, which returns a new OskaBoard.
     def movepiece(self, currRow, currCol, direction):
         
         nextCol = nextRow = jumpRow = jump = oppTurn = index= None
@@ -244,12 +249,12 @@ class OskaBoard:
         if self.playerTurn == 'w':
             for piece in self.wPieces:
                 index = self.wPieces.index(piece)
-                newBoards += self.moveprep(piece, index, self.playerTurn, True)
+                newBoards += self.prep_move_data(piece, index, self.playerTurn, True)
 
         else:
             for piece in self.bPieces:
                 index = self.bPieces.index(piece)
-                newBoards += self.moveprep(piece, index, self.playerTurn, True)
+                newBoards += self.prep_move_data(piece, index, self.playerTurn, True)
 
         # Return any boards generated
         if newBoards != []:
@@ -268,13 +273,13 @@ class OskaBoard:
     # Preps relevant data for use by "makemove" function.
     #   
     # makemove is modular, it will perform the correct move regardless of which player's turn it is or where the piece is on the board, 
-    # so long as it is given the right inputs. moveprep determines where on the board the piece is, which player's piece it is,
+    # so long as it is given the right inputs. prep_move_data determines where on the board the piece is, which player's piece it is,
     # where the piece could be moving to, and what the modifiers passed into makemove should be in order for it to make the proper move.
     #  
     # Inputs: piece object (tuple of row, col) to be moved, index of piece to be moved
     #  
     # Return: List of boards that can be reached by moving a specific piece
-    def moveprep(self, piece, index, playerTurn, makingMove):
+    def prep_move_data(self, piece, index, playerTurn, makingMove):
 
         #Gather data from piece object into named variables
         currRow = piece[0]
@@ -323,7 +328,7 @@ class OskaBoard:
 
 
 
-    # Carries out the possible moves for a given piece, based on prep it is passed from moveprep
+    # Carries out the possible moves for a given piece, based on prep it is passed from prep_move_data
     # 
     # Inputs: piece index, opponent color, row of piece, row piece could move to, row piece could jump to, current column of piece, 
     # possible columps piece could move to as nested tuples <<((leftCol, leftJump), (rightCol, rightJump))>>
@@ -413,6 +418,12 @@ class OskaBoard:
         self.replacechar(jumpSpace[0], jumpSpace[1], self.playerTurn)
 
 
+
+    # Calculates minimax value of a board.
+    # 
+    # Inputs: None
+    # 
+    # Return: Minimax value 
     def boardeval(self):
 
         if self.playerTurn == 'b' and self.gameover():
@@ -423,7 +434,7 @@ class OskaBoard:
         wNum = len(self.wPieces)
         bNum = len(self.bPieces)
 
-        val = (wNum - bNum) * 2
+        val = (wNum - bNum)
         #print(val)
         wDist = 0
         for wpiece in self.wPieces:
@@ -433,56 +444,73 @@ class OskaBoard:
         for bpiece in self.bPieces:
             bDist += bpiece[0]
 
-        val += bDist - wDist
+        if wDist < bDist:
+            val += 5
+        elif wDist > bDist:
+            val += -5
 
         #print(val)
         for piece in self.wPieces:
             index = self.wPieces.index(piece)
-            moves = self.moveprep(piece, index, 'w', False)
+            moves = self.prep_move_data(piece, index, 'w', False)
             #print(moves)
             if moves[0] > 0:
                 val += 1
             val += moves[1]
 
+            if piece[0] > (self.totalRows + 1) / 2:
+                val += 1
+
         #print(val)
         for piece in self.bPieces:
             index = self.bPieces.index(piece)
-            moves = self.moveprep(piece, index, 'b', False)
+            moves = self.prep_move_data(piece, index, 'b', False)
             if moves[0] > 0:
                 val += -1
             val += -moves[1]
 
+            if piece[0] < (self.totalRows + 1) / 2:
+                val += -1
+
         #print(val)
 
-        #wInGoal = False
-        #bInGoal = False
+        wInGoal = False
+        bInGoal = False
         wGoalCount = 0
         bGoalCount = 0
         for char in self.board[0]:
             if char == 'b':
-        #        bInGoal = True
+                bInGoal = True
                 bGoalCount += 1
 
         for char in self.board[self.totalRows - 1]:
             if char == 'w':
-        #        wInGoal = True
+                wInGoal = True
                 wGoalCount += 1
 
-        val += wGoalCount - bGoalCount
+        #val += (wGoalCount - bGoalCount) * 5
         
 
         #eval += self.maxRowLength * wGoalCount
         #eval += self.maxRowLength * bGoalCount * -1
 
-        #if wInGoal == True:
-        val += (len(self.wPieces) - wGoalCount) * (-1)
+        if wInGoal == True:
+            val += 2 * self.maxRowLength
+            val += (len(self.wPieces) - wGoalCount) * (-2)
         
-        #if bInGoal == True:
-        val += (len(self.bPieces) - bGoalCount)    
+        if bInGoal == True:
+            val += -2 * self.maxRowLength
+            val += (len(self.bPieces) - bGoalCount)  * 2  
 
         return val
 
 
+
+    # Check to see how many available non-jump moves there are for a given piece. Utilizes prep from prep_move_data.
+    # 
+    # Inputs: Row ahead of piece, columns ahead of piece.
+    # 
+    # Return: Number of available moves 
     def canMove(self, nextRow, nextCols):
         openMoves = 0
         for col in nextCols:
@@ -492,6 +520,12 @@ class OskaBoard:
         return openMoves
 
 
+
+    # Check to see how many available jump moves there are for a given piece. Utilizes prep from prep_move_data.
+    # 
+    # Inputs: Opponent character, Row ahead of piece, row piece would jump to, current column, (columns ahead of piece, columns piece would jump to).
+    # 
+    # Return: Number of available moves 
     def canJump(self, oppTurn, nextRow, jumpRow, currCol, nextCols):
         availableJumps = 0
         for col in nextCols:
@@ -510,7 +544,11 @@ class OskaBoard:
 
         
 
-
+    # Checks to see if white has a win. If so, returns True.
+    # 
+    # Inputs: None
+    # 
+    # Ouputs: None 
     def wWin(self):
         if len(self.bPieces) == 0:
             return True
@@ -522,6 +560,13 @@ class OskaBoard:
         if count != 0 and count == len(self.wPieces):
             return True
 
+
+
+    # Checks to see if black has a win. If so, returns True.
+    # 
+    # Inputs: None
+    # 
+    # Ouputs: None 
     def bWin(self):
         if len(self.wPieces) == 0:
             return True
@@ -533,6 +578,13 @@ class OskaBoard:
         if count != 0 and count == len(self.bPieces):
             return True
 
+
+
+    # Checks to see if either player has a win. If so, returns True.
+    # 
+    # Inputs: None
+    # 
+    # Ouputs: None 
     def gameover(self):
         if len(self.wPieces) == 0:
             return True
@@ -544,3 +596,5 @@ class OskaBoard:
             return True
         elif self.playerTurn == 'b' and self.wWin() == True:
             return True
+
+        
