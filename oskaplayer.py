@@ -1,6 +1,57 @@
 import OskaBoard
 
-# Required move-generation function.
+
+# Oskaplayer highest level function. Calls minimax on a single board and returns best move.
+# 
+# Inputs: An OskaBoard, a character representing the moving player, the depth minimax should search to
+# 
+# Return: the best board found 
+def oskaplayer(inBoard, player, depth):
+    if not (player == 'w' or player == 'b'):
+        print('Invalid player input, aborting.')
+        return None
+
+    board = OskaBoard.OskaBoard(inBoard, player)
+
+    output = findbestmove(board, depth)
+
+    minimaxVal = output[1]
+
+    bestMove = output[0]
+
+    if bestMove.wWin() and bestMove.bWin():
+        if len(bestMove.bPieces) > len(bestMove.wPieces):
+            print('Black wins!')
+        elif len(bestMove.bPieces) < len(bestMove.wPieces):
+            print('White wins!')
+        else:
+            print('Draw!')
+    elif bestMove.wWin():
+        print('White wins!')
+    elif bestMove.bWin():
+        print('Black wins!')
+    else:
+        stalemate = True
+        for piece in bestMove.wPieces:
+            index = bestMove.wPieces.index(piece)
+            if bestMove.prep_move_data(piece, index, 'w', bestMove.can_move) > 0:
+                stalemate = False
+                break
+        for piece in bestMove.bPieces:
+            index = bestMove.bPieces.index(piece)
+            if bestMove.prep_move_data(piece, index, 'b', bestMove.can_move) > 0:
+                stalemate = False
+                break
+        if stalemate:
+            print('Draw!')
+    
+    print('Board Value:', minimaxVal)
+
+    return bestMove.board
+
+
+
+# Required move-generation function. (OUTDATED)
 # 
 # Inputs: Oska board of any length as list, moving player's turn
 # 
@@ -27,14 +78,14 @@ def movepiece(inBoard):
 
 
 
-# Finds the best possible move for a given player (according to boardeval).
+# Finds the best possible move for a given player (according to evaluate_board).
 # 
-# Inputs: an OskaBoard, searchdepth, whether or not the function is maxing or not (boolean)
+# Inputs: an OskaBoard, search depth, alpha value, beta value, whether or not the function is maxing or not (boolean)
 # 
 # Return: tuple: (new board, board's minimax val) 
 def minimax(board, depth, alpha, beta, maxing):
     if depth == 0 or board.gameover():
-        return (board, board.boardeval())
+        return (board, board.evaluate_board())
     
     bestBoard = None
 
@@ -70,19 +121,24 @@ def minimax(board, depth, alpha, beta, maxing):
 
 
 
-# Runs minimax algorithm for player whose turn it is.
+# Runs minimax algorithm at given depthfor player whose turn it is.
 # 
-# Inputs: an OskaBoard
+# Inputs: an OskaBoard, a depth for minimax to run
 # 
 # Return: tuple: (new board, board's minimax val) 
-def findbestmove(board):
+def findbestmove(board, depth):
     if board.playerTurn == 'w':
-        return minimax(board, 6, -9999999999999, 9999999999999, True)
+        return minimax(board, depth, -9999999999999, 9999999999999, True)
     else:
-        return minimax(board, 6, -9999999999999, 9999999999999, False)
+        return minimax(board, depth, -9999999999999, 9999999999999, False)
 
 
 
+# Lets a player play against ai, for testing.
+# 
+# Inputs: None
+# 
+# Return: None 
 def playervsai():
     color = input('Black or White? b/w')
     newBoard = OskaBoard.OskaBoard(['wwwww','----','---','--','---','----','bbbbb'], 'w')
@@ -100,14 +156,14 @@ def playervsai():
         if newBoard.playerTurn == color:
             print('player move:')
             newBoard = movepiece(newBoard)
-            print('board val:', newBoard.boardeval())
+            print('board val:', newBoard.evaluate_board())
         else:
             print('opponents move:')
-            output = findbestmove(newBoard)
+            output = findbestmove(newBoard, 6)
             print('minimax val:', output[1])
             
             newBoard = output[0]
-            print('board val:', newBoard.boardeval())
+            print('board val:', newBoard.evaluate_board())
 
         if doubleLastBoard == lastBoard == newBoard:
             break
@@ -127,6 +183,11 @@ def playervsai():
 
 
 
+# Lets an ai play against itself with a preset board, for testing.
+# 
+# Inputs: None
+# 
+# Return: None 
 def aivsai():
     newBoard = OskaBoard.OskaBoard(['wwwww','----','---','--','---','----','bbbbb'], 'w')
 
@@ -144,26 +205,24 @@ def aivsai():
         newBoard.printBoard()
         if newBoard.playerTurn == 'w':
             print('player move:')
-            output = findbestmove(newBoard)
+            output = findbestmove(newBoard, 6)
             print('minimax val:', output[1])
             
             newBoard = output[0]
-            print('board val:', newBoard.boardeval())
+            print('board val:', newBoard.evaluate_board())
         else:
             print('opponents move:')
-            output = findbestmove(newBoard)
+            output = findbestmove(newBoard, 6)
             print('minimax val:', output[1])
             
             newBoard = output[0]
-            print('board val:', newBoard.boardeval())
+            print('board val:', newBoard.evaluate_board())
 
         if doubleLastBoard != None and doubleLastBoard.board == lastBoard.board == newBoard.board:
             print('Tie!')
             break
 
     newBoard.printBoard()
-
-    
 
     if newBoard.bWin():
         print('Black wins!')
@@ -182,59 +241,14 @@ def aivsai():
 # Leaving it here so that I don't have a file with just one function hanging around awkwardly.
 def testinput():
 
-    newBoard = OskaBoard.OskaBoard(['wwww','---','--','---','bbbb'], 'b')
-    newBoard.printBoard()
-
-
-    #print(newBoard.moveprep((0,1),newBoard.wPieces.index((0,1)), False))
-    #print(newBoard.moveprep((2,1),newBoard.bPieces.index((2,1)), False))
-
-    print(newBoard.boardeval())
-    #newBoard = movepiece(newBoard)
-    #newBoard.printBoard()
-    #newBoard = movepiece(newBoard)
-    #newBoard.printBoard()
-    #bestMove = findbestmove(newBoard)
-    #print('minimax value:',bestMove[1])
-    #bestMove[0].printBoard()
+    print(oskaplayer(['----','w--','b-','---','---w'], 'b', 6))
+    
 
 
 
-    #eval = newBoard.boardeval()
-    #print('eval: ', eval)
 
 
-    #newBoard2 = OskaBoard.OskaBoard(['b----','----','---','-w','--w','----','-----'], 'W')
-    #newBoard2.printBoard()
 
-    #eval = newBoard2.boardeval()
-    #print('eval: ', eval)
-
-    #newBoard3 = OskaBoard.OskaBoard(['wwwww','----','---','---','----','bbbbb'], 'W')
-
-    #newBoard4 = OskaBoard.OskaBoard(['wwww-w','---w-','----','---','--','---','-b--','-----','b-bbbb'], 'W')
-    #newBoard4.printBoard()
-
-    #newBoard5 = OskaBoard.OskaBoard(['wwww','w--','--','---','bbbb'], 'W')
-    #newBoard5.printBoard()
-
-    #newBoard6 = OskaBoard.OskaBoard(['wwwq','---','--','---','bbbb'], 'W')
-    #newBoard6.printBoard()
 
     
-    #newChildren = newBoard.generatechildren()
-    #for child in newChildren:
-    #    child.printBoard()
-
-    #newChildren2 = generatechildren(newBoard2, 'w')
-    #for child in newChildren2:
-    #    child.printBoard()
-
-    #newChildren7b = movegen(newBoard7, 'b')
-    #for child in newChildren7b:
-    #    child.printBoard()
-
-    #newChildren7w = movegen(['--ww--','--b--','-w--','-b-','-w','---','----','-----','------'], 'b')
-    #for child in newChildren7w:
-    #    child.printBoard()
     
